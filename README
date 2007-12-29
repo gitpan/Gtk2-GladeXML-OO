@@ -1,0 +1,32 @@
+NAME
+	Gtk2::GladeXML::OO 
+
+SYNOPSIS
+        use Gtk2 -init;
+        use Gtk2::GladeXML;
+        use Gtk2::GladeXML::OO;
+
+		sub AUTOLOAD { _autoload_gtk($gladexml, our $AUTOLOAD, @_); }
+
+		our $myobject = MyObject->new();
+
+DESCRIPTION
+  Gtk2::GladeXML::OO provide object oriented interface in glade. See example!
+
+  Functions
+
+    _autoload_gtk($gladexml, our $AUTOLOAD, @_)
+		Use AUTOLOAD to find requested module.
+
+  Variables
+
+	$Gtk2::GladeXML::OO::LOG = 0
+		Set to 1 to turn on debug.
+
+BUGS
+	None known.
+
+AUTHOR
+        Strzelecki £ukasz <strzelecki@rswsystems.pl>
+
+
