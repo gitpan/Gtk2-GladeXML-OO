@@ -1,9 +1,8 @@
 package Gtk2::GladeXML::OO;
 
-our $VERSION = 0.03;
+our $VERSION = '0.031';
 use strict;
 use warnings;
-#use Exporter::Lite;
 require Exporter;
 #======================================================================
 our @ISA = qw(Exporter);
