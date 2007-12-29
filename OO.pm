@@ -1,10 +1,11 @@
 package Gtk2::GladeXML::OO;
 
-our $VERSION = '0.031';
+use vars qw($VERSION);
 use strict;
 use warnings;
 require Exporter;
 #======================================================================
+$VERSION = '0.032';
 our @ISA = qw(Exporter);
 our @EXPORT = qw(_autoload_gtk);
 #======================================================================
