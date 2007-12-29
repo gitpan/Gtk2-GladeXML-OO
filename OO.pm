@@ -1,14 +1,17 @@
 package Gtk2::GladeXML::OO;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 use strict;
 use warnings;
-use Exporter::Lite;
+#use Exporter::Lite;
+require Exporter;
+#======================================================================
+our @ISA = qw(Exporter);
+our @EXPORT = qw(_autoload_gtk);
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
 #======================================================================
-our @EXPORT = qw(_autoload_gtk);
 my ($widget);
 my ($objects);
 our $tmp;
