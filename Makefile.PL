@@ -4,4 +4,8 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'Gtk2::GladeXML::OO',
     'VERSION_FROM' => 'OO.pm', # finds $VERSION
+    'PREREQ_PM'     => { 'Gtk2::GladeXML' => 1.0 }, # e.g., Module::Name => 1.1
+    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
+      (AUTHOR     => '£ukasz Strzelecki <strzelec@rswsystems.pl>') : ()),
+	
 );
