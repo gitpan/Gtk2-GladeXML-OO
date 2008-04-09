@@ -1,18 +1,16 @@
 package Gtk2::GladeXML::OO;
 
-use vars qw($VERSION @ISA @EXPORT $LOG $tmp);
+use vars qw($VERSION $LOG $tmp);
 use strict;
 use warnings;
-require Exporter;
+use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.34';
-@ISA = qw(Exporter);
-@EXPORT = qw(_autoload_gtk);
+$VERSION = '0.35';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
 #======================================================================
-my ($widget, $objects);
+my ($gladexml, $widget, $objects);
 #======================================================================
 sub _log {
 	my ($object, $method, @params) = @_;
@@ -35,10 +33,13 @@ EOF
 
 }
 #======================================================================
-sub _autoload_gtk {
-	my ($gladexml, $str) = (shift, shift);
-	 
-	my ($object, $method, $params) = $str =~ /^main::(.+)->([^\(]+)(.*)/;
+sub new_from {
+	$gladexml = __PACKAGE__->new($_[1]);
+	return $gladexml;
+}
+#======================================================================
+sub main::AUTOLOAD {
+	my ($object, $method, $params) = $main::AUTOLOAD =~ /^main::(.+)->([^\(]+)(.*)/;
 
 	my @params;
 	if($params){
@@ -70,24 +71,21 @@ sub _autoload_gtk {
 	warn qq/Unknown method "$method" of object "$object"!\n/ and return unless $objects->{$object}->can($method);
 	$objects->{$object}->$method(@params);
 	return TRUE;
-}
+};
 #======================================================================
 1;
 
 =head1 NAME
 
-Gtk2::GladeXML::OO - Object oriented interface to Glade.
+Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with B<AUTOLOAD> for objects and object oriented interface to Glade.
 
 
 =head1 SYNOPSIS
 
-	use Gtk2::GladeXML;
 	use Gtk2::GladeXML::OO;
 	
-	our $gladexml = Gtk2::GladeXML->new('glade/example.glade');
+	our $gladexml = Gtk2::GladeXML::OO->new_from('glade/example.glade');
 	$gladexml->signal_autoconnect_from_package('main');
-
-	sub AUTOLOAD { _autoload_gtk($gladexml, our $AUTOLOAD, @_); }
 
 	sub gtk_main_quit { Gtk2->main_quit; }
 
@@ -109,19 +107,21 @@ Gtk2::GladeXML::OO - Object oriented interface to Glade.
 
 =head1 DESCRIPTION
 
-This module provides object oriented interface in Glade callbacks. Now You can use in callbacks widget, Your objects or standard functions like before.
+This module provides AUTOLOAD function for objects (automagicaly loads Your objects) and object oriented interface in Glade callbacks. Now You can use in callbacks widget, Your objects or standard functions like before.
 
 =head1 SUBROUTINES/METHODS
 
 =over 4
 
-=item B<_autoload_gtk($gladexml, our $AUTOLOAD, @_)>
+=item B<new_from($gladexml, our $AUTOLOAD, @_)>
 
-This method should be called with 3 parameters somewhere in AUTOLOAD sub in main package. In example:
+This method should be called exactly as C<new> in Gtk2::GladeXML (if You use C<new> in place of C<new_from>, this package will beheave exactly as Gtk2::GladeXML). In example:
 
-	sub AUTOLOAD { _autoload_gtk($gladexml, our $AUTOLOAD, @_); }
+	# Gtk2::GladeXML::OO object
+	our $gladexml = Gtk2::GladeXML::OO->new_from('glade/example.glade');
 
-	# $galdexml - GladeXML object
+	# same as standard Gtk2::GladeXML object!!!
+	our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 
 =item B<$Gtk2::GladeXML::OO::LOG>
 
@@ -135,14 +135,12 @@ Set this variable to true for debug.
 
 =item Gtk2::GladeXML
 
-=item Exporter
-
 =back
 
 
 =head1 INCOMPATIBILITIES
 
-None known.
+This package will define C<AUTOLOAD> function in C<main> package. You should consider this (little work around?). This will be corrected in future versions.
 
 =head1 BUGS AND LIMITATIONS
 

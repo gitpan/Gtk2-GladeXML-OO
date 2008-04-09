@@ -3,8 +3,6 @@ example
 example/glade
 example/glade/example.gladep
 example/glade/example.glade
-example/glade/example.gladep.bak
-example/glade/example.glade.bak
 example/Gtk2
 example/Gtk2/GladeXML
 example/Gtk2/GladeXML/OO.pm

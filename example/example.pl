@@ -3,14 +3,12 @@
 use warnings;
 use strict;
 use Gtk2 -init;
-use Gtk2::GladeXML;
+use lib qw( . );
 use Gtk2::GladeXML::OO;
 #======================================================================
 # GLADEXML
-our $gladexml = Gtk2::GladeXML->new('glade/example.glade');
+our $gladexml = Gtk2::GladeXML::OO->new_from('glade/example.glade');
 $gladexml->signal_autoconnect_from_package('main');
-
-sub AUTOLOAD { _autoload_gtk($gladexml, our $AUTOLOAD, @_); }
 
 # see below for code of this class...
 our $myobject = MyObject->new();
