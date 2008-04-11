@@ -1,5 +1,8 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.351  Thr Apr 11 17:33:04 CEST 2008
+	- Fixed some bugs in documentation.
+
 0.35   Wed Apr  9 10:39:03 CEST 2008
 	- Changed interface. Invoking AUTOLOAD is not needed.
 	- Exporter is'nt needed. Only OO interface is used.

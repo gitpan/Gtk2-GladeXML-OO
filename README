@@ -28,11 +28,11 @@ SYNOPSIS
 DESCRIPTION
     This module provides AUTOLOAD function for objects (automagicaly loads
     Your objects) and object oriented interface in Glade callbacks. Now You
-    can use in callbacks widget, Your objects or standard functions like
+    can use in callbacks widgets, Your objects or standard functions like
     before.
 
 SUBROUTINES/METHODS
-    new_from($gladexml, our $AUTOLOAD, @_)
+    new_from('/path/to/file.glade')
         This method should be called exactly as "new" in Gtk2::GladeXML (if
         You use "new" in place of "new_from", this package will beheave
         exactly as Gtk2::GladeXML). In example:

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.35';
+$VERSION = '0.351';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
@@ -107,13 +107,13 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with B<AUTOLOAD> for
 
 =head1 DESCRIPTION
 
-This module provides AUTOLOAD function for objects (automagicaly loads Your objects) and object oriented interface in Glade callbacks. Now You can use in callbacks widget, Your objects or standard functions like before.
+This module provides AUTOLOAD function for objects (automagicaly loads Your objects) and object oriented interface in Glade callbacks. Now You can use in callbacks widgets, Your objects or standard functions like before.
 
 =head1 SUBROUTINES/METHODS
 
 =over 4
 
-=item B<new_from($gladexml, our $AUTOLOAD, @_)>
+=item B<new_from('/path/to/file.glade')>
 
 This method should be called exactly as C<new> in Gtk2::GladeXML (if You use C<new> in place of C<new_from>, this package will beheave exactly as Gtk2::GladeXML). In example:
 
