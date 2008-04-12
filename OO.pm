@@ -4,13 +4,16 @@ use vars qw($VERSION $LOG $tmp);
 use strict;
 use warnings;
 use base 'Gtk2::GladeXML';
+use Hook::LexWrap qw(wrap);
 #======================================================================
-$VERSION = '0.351';
+$VERSION = '0.36';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
 #======================================================================
-my ($gladexml, $widget, $objects);
+my ($gladexml, $widget, $objects, $LOG);
+#======================================================================
+wrap Gtk2::GladeXML::new, post => sub { $gladexml = $_[-1]; };
 #======================================================================
 sub _log {
 	my ($object, $method, @params) = @_;
@@ -33,10 +36,7 @@ EOF
 
 }
 #======================================================================
-sub new_from {
-	$gladexml = __PACKAGE__->new($_[1]);
-	return $gladexml;
-}
+sub Gtk2::GladeXML::debug { $LOG = $_[1]; }
 #======================================================================
 sub main::AUTOLOAD {
 	my ($object, $method, $params) = $main::AUTOLOAD =~ /^main::(.+)->([^\(]+)(.*)/;
@@ -84,8 +84,10 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with B<AUTOLOAD> for
 
 	use Gtk2::GladeXML::OO;
 	
-	our $gladexml = Gtk2::GladeXML::OO->new_from('glade/example.glade');
+	our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 	$gladexml->signal_autoconnect_from_package('main');
+
+	$gladexml->debug(1);
 
 	sub gtk_main_quit { Gtk2->main_quit; }
 
@@ -113,25 +115,34 @@ This module provides AUTOLOAD function for objects (automagicaly loads Your obje
 
 =over 4
 
-=item B<new_from('/path/to/file.glade')>
+=item B<new('/path/to/file.glade')>
 
-This method should be called exactly as C<new> in Gtk2::GladeXML (if You use C<new> in place of C<new_from>, this package will beheave exactly as Gtk2::GladeXML). In example:
+This method should be called exactly as C<new> in Gtk2::GladeXML. In example:
 
 	# Gtk2::GladeXML::OO object
-	our $gladexml = Gtk2::GladeXML::OO->new_from('glade/example.glade');
-
-	# same as standard Gtk2::GladeXML object!!!
 	our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 
-=item B<$Gtk2::GladeXML::OO::LOG>
+=item B<debug>
 
-Set this variable to true for debug.
+This method turns on/off debug. In example:
+	
+	# tunrs ON debug
+	$gladexml->debug(1);
+	
+	...some code...
+
+	# turns OFF debug
+	$gledexml->debug(0);
+
+=item B<For all other methods see C<Gtk2::GladeXML>!!!>
 
 =back
 
 =head1 DEPENDENCIES
 
 =over 4
+
+=item Hook::LexWrap
 
 =item Gtk2::GladeXML
 
@@ -140,7 +151,7 @@ Set this variable to true for debug.
 
 =head1 INCOMPATIBILITIES
 
-This package will define C<AUTOLOAD> function in C<main> package. You should consider this (little work around?). This will be corrected in future versions.
+This package will define C<AUTOLOAD> function in C<main> package. You should consider this (little work around?), when You're using AUTOLOAD. This will be corrected in future versions.
 
 =head1 BUGS AND LIMITATIONS
 

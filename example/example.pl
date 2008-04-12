@@ -7,8 +7,9 @@ use lib qw( . );
 use Gtk2::GladeXML::OO;
 #======================================================================
 # GLADEXML
-our $gladexml = Gtk2::GladeXML::OO->new_from('glade/example.glade');
+our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 $gladexml->signal_autoconnect_from_package('main');
+$gladexml->debug(1);
 
 # see below for code of this class...
 our $myobject = MyObject->new();

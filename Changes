@@ -1,5 +1,11 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.36   Sat Apr 12 16:15:43 CEST 2008
+	- Added new method => debug
+	- Removed method 'new_from'. Now 'new' runs OK and Gtk2::GladeXML::OO is realy drop-in repleacement.
+	- Gtk2::GladeXML::OO::LOG removed. Use method 'debug' instead.
+	- Extended example.
+
 0.351  Thr Apr 11 17:33:04 CEST 2008
 	- Fixed some bugs in documentation.
 
