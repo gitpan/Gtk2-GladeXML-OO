@@ -6,7 +6,7 @@ use warnings;
 use base 'Gtk2::GladeXML';
 use Hook::LexWrap qw(wrap);
 #======================================================================
-$VERSION = '0.36';
+$VERSION = '0.361';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
@@ -77,7 +77,7 @@ sub main::AUTOLOAD {
 
 =head1 NAME
 
-Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with B<AUTOLOAD> for objects and object oriented interface to Glade.
+Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented interface to Glade and AUTOLOAD for all objects.
 
 
 =head1 SYNOPSIS
@@ -109,7 +109,8 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with B<AUTOLOAD> for
 
 =head1 DESCRIPTION
 
-This module provides AUTOLOAD function for objects (automagicaly loads Your objects) and object oriented interface in Glade callbacks. Now You can use in callbacks widgets, Your objects or standard functions like before.
+This module provides AUTOLOAD function for objects (automagicaly loads Your objects, B<no action is required on your part>) and object-oriented interface in Glade callbacks. Now You can use in callbacks: widgets, Your objects or standard functions like before.
+Gtk2::GladeXML::OO is a drop-in replacement for Gtk2::GladeXML, so after change from Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications will work fine and will have new functionality.
 
 =head1 SUBROUTINES/METHODS
 
@@ -134,7 +135,7 @@ This method turns on/off debug. In example:
 	# turns OFF debug
 	$gledexml->debug(0);
 
-=item B<For all other methods see C<Gtk2::GladeXML>!!!>
+=item B<For all other methods see C<Gtk2::GladeXML>!>
 
 =back
 
@@ -151,7 +152,7 @@ This method turns on/off debug. In example:
 
 =head1 INCOMPATIBILITIES
 
-This package will define C<AUTOLOAD> function in C<main> package. You should consider this (little work around?), when You're using AUTOLOAD. This will be corrected in future versions.
+This package will define C<AUTOLOAD> function in C<main> package. You should consider this (little work around?), when You're using AUTOLOAD in Your application (exactly main::AUTOLOAD). This will be corrected in future versions.
 
 =head1 BUGS AND LIMITATIONS
 

@@ -1,6 +1,6 @@
 NAME
-    Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with
-    AUTOLOAD for objects and object oriented interface to Glade.
+    Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object
+    oriented interface to Glade and AUTOLOAD for all objects.
 
 SYNOPSIS
             use Gtk2::GladeXML::OO;
@@ -29,9 +29,12 @@ SYNOPSIS
 
 DESCRIPTION
     This module provides AUTOLOAD function for objects (automagicaly loads
-    Your objects) and object oriented interface in Glade callbacks. Now You
-    can use in callbacks widgets, Your objects or standard functions like
-    before.
+    Your objects, no action is required on your part) and object-oriented
+    interface in Glade callbacks. Now You can use in callbacks: widgets,
+    Your objects or standard functions like before. Gtk2::GladeXML::OO is a
+    drop-in replacement for Gtk2::GladeXML, so after change from
+    Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications will work
+    fine and will have new functionality.
 
 SUBROUTINES/METHODS
     new('/path/to/file.glade')
@@ -52,7 +55,7 @@ SUBROUTINES/METHODS
                 # turns OFF debug
                 $gledexml->debug(0);
 
-    For all other methods see "Gtk2::GladeXML"!!!
+    For all other methods see "Gtk2::GladeXML"!
 
 DEPENDENCIES
     Hook::LexWrap
@@ -60,8 +63,9 @@ DEPENDENCIES
 
 INCOMPATIBILITIES
     This package will define "AUTOLOAD" function in "main" package. You
-    should consider this (little work around?), when You're using AUTOLOAD.
-    This will be corrected in future versions.
+    should consider this (little work around?), when You're using AUTOLOAD
+    in Your application (exactly main::AUTOLOAD). This will be corrected in
+    future versions.
 
 BUGS AND LIMITATIONS
     None known.
