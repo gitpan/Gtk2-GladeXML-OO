@@ -3,7 +3,7 @@
 use warnings;
 use strict;
 use Gtk2 -init;
-use lib qw( . );
+use lib qw( ../lib );
 use Gtk2::GladeXML::OO;
 #======================================================================
 # GLADEXML

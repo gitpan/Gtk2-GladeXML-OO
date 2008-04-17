@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.37';
+$VERSION = '0.371';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;

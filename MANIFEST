@@ -1,10 +1,9 @@
-example/Gtk2/GladeXML/OO.pm
 example/example.pl
 example/glade/example.glade
 example/glade/example.gladep
 Changes
 MANIFEST
 Makefile.PL
-OO.pm
 README
 test.pl
+lib/Gtk2/GladeXML/OO.pm
