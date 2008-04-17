@@ -1,5 +1,11 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.37   Thr Apr 17 18:54:02 CEST 2008
+	- Fixed problem with user define AUTOLOAD
+	- Hook::LexWrap no needed
+	- Added debug levels
+	- Fixed installation warnings
+
 0.361  Wed Apr 16 02:13:59 CEST 2008
 	- Little changes in documentation.
 

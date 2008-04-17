@@ -3,32 +3,47 @@ package Gtk2::GladeXML::OO;
 use vars qw($VERSION $LOG $tmp);
 use strict;
 use warnings;
+use Carp;
 use base 'Gtk2::GladeXML';
-use Hook::LexWrap qw(wrap);
 #======================================================================
-$VERSION = '0.361';
+$VERSION = '0.37';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
 #======================================================================
-my ($gladexml, $widget, $objects, $LOG);
+my ($gladexml, $widget, $objects, $LOG) = (undef, undef, undef, 1);
+our $AUTOLOAD;
 #======================================================================
-wrap Gtk2::GladeXML::new, post => sub { $gladexml = $_[-1]; };
+sub new {
+	my $class = shift;
+	$gladexml = Gtk2::GladeXML->new(@_);
+	return bless $gladexml, $class;
+}
 #======================================================================
 sub _log {
 	my ($object, $method, @params) = @_;
 	
+	$object = '' unless defined $object;
+	$method = '' unless defined $method;
 	@params = () unless @params;
-	print <<EOF
+	for(0..$#params){
+		unless(defined $params[$_]){ $params[$_] = "undef\n"; }
+		else { $params[$_] .= "\n"; }
+	}
+
+	warn <<EOF
 	
 	
 ####################################
 # event #
 #########
 	
-	OBJECT: $object
-	METHOD: $method
-	PARAMS: @params
+	CALLED: $AUTOLOAD
+	
+	PARSING
+		OBJECT: $object
+		METHOD: $method
+		PARAMS: @params
 	
 ####################################
 	
@@ -36,10 +51,14 @@ EOF
 
 }
 #======================================================================
-sub Gtk2::GladeXML::debug { $LOG = $_[1]; }
-#======================================================================
-sub main::AUTOLOAD {
-	my ($object, $method, $params) = $main::AUTOLOAD =~ /^main::(.+)->([^\(]+)(.*)/;
+# this _must_ be in check function, otherway someone could redefine our AUTOLOAD
+CHECK {
+#----------------------------------------------------------------------
+my $autoload = *main::AUTOLOAD{CODE};
+*AUTOLOAD = *main::AUTOLOAD{SCALAR};
+
+my $imposter = sub {
+	my ($object, $method, $params) = $AUTOLOAD =~ /^main::(.+)->([^\(]+)(.*)/;
 
 	my @params;
 	if($params){
@@ -56,22 +75,50 @@ sub main::AUTOLOAD {
 		}
 	}else { @params = @_; } 
 
-	_log($object, $method, @params) if $LOG;
+	_log($object, $method, @params) if $LOG > 1;
+		
+	if(not $object){
+		warn qq/\nNone object was given. Calling user AUTOLOAD if defined.\n\n/ if $LOG;
+		defined $autoload ? return &$autoload : return;
+	}elsif(not $method){
+		warn qq/\nNone method was given. Calling user AUTOLOAD if defined.\n\n/ if $LOG;
+		defined $autoload ? return &$autoload : return;
+	}
 
-	return unless $method;
-	
-	unless($objects->{$object}){$objects->{$object} = $gladexml->get_widget($object); }
+	$objects->{$object} = $gladexml->get_widget($object) unless $objects->{$object};
 
 	if(not $objects->{$object} and defined $main::{$object}){
 		local *tmp = $main::{$object};
 		$objects->{$object} = $tmp;
 	}
-		
-	warn qq/Unknown object "$object"!\n/ and return unless $objects->{$object};
-	warn qq/Unknown method "$method" of object "$object"!\n/ and return unless $objects->{$object}->can($method);
+	
+	if(not $object){
+		warn qq/\nUnknown object "$object"! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
+		defined $autoload ? return &$autoload : return;
+	}elsif(not $objects->{$object}->can($method)){
+		warn qq/\nUnknown method "$method" of object "$object"! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
+		defined $autoload ? return &$autoload : return;
+	}
+	
 	$objects->{$object}->$method(@params);
 	return TRUE;
 };
+#-------------------------------------------
+# redefine main::AUTOLOAD and define debug()
+{
+	no warnings 'redefine';
+	
+	*main::AUTOLOAD = $imposter;
+	
+	*Gtk2::GladeXML::debug = sub { 
+									my $lvl = defined $_[1] ? $_[1] : 0;
+									croak(qq/Value "$lvl" is not a digit!/) if $lvl !~ /^\d+$/o;
+									$LOG = $_[1]; 
+									};
+}
+#----------------------------------------------------------------------
+# End of CHECK block
+}
 #======================================================================
 1;
 
@@ -84,10 +131,11 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented
 
 	use Gtk2::GladeXML::OO;
 	
+	# exactly as in Gtk2::GladeXML
 	our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 	$gladexml->signal_autoconnect_from_package('main');
 
-	$gladexml->debug(1);
+	$gladexml->debug(2);
 
 	sub gtk_main_quit { Gtk2->main_quit; }
 
@@ -109,8 +157,13 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented
 
 =head1 DESCRIPTION
 
-This module provides AUTOLOAD function for objects (automagicaly loads Your objects, B<no action is required on your part>) and object-oriented interface in Glade callbacks. Now You can use in callbacks: widgets, Your objects or standard functions like before.
-Gtk2::GladeXML::OO is a drop-in replacement for Gtk2::GladeXML, so after change from Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications will work fine and will have new functionality.
+This module provides a clean and easy object-oriented interface in Glade callbacks (automagicaly loads objects and do all dirty work for you, B<no action is required on your part>). Now You can use in callbacks: widgets, Your objects or standard functions like before.
+
+Gtk2::GladeXML::OO is a drop-in replacement for Gtk2::GladeXML, so after a change from Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications will work fine and will have new functionality.
+
+=head1 AUTOLOAD
+
+If You are using AUTOLOAD subroutine in main package, Gtk2::GladeXML::OO module will invoke it, when it cound'nt find any matching object in Glade file and Your code.
 
 =head1 SUBROUTINES/METHODS
 
@@ -125,15 +178,27 @@ This method should be called exactly as C<new> in Gtk2::GladeXML. In example:
 
 =item B<debug>
 
-This method turns on/off debug. In example:
+This method turns on/off debug. Three levels are acceptable. 
+
+	0  =>  turns OFF debug
+	1  =>  turns ON debug (only important information/warnings), DEFAULT
+	2  =>  turns ON debug in verbose mode, use this when You are in a trouble
+
+In example:
 	
+	# tunrs OFF debug
+	$gladexml->debug(0);
+	
+	...some code...
+
 	# tunrs ON debug
 	$gladexml->debug(1);
 	
 	...some code...
+	# turns ON debug in verbose mode
+	$gledexml->debug(2);
+	
 
-	# turns OFF debug
-	$gledexml->debug(0);
 
 =item B<For all other methods see C<Gtk2::GladeXML>!>
 
@@ -143,7 +208,7 @@ This method turns on/off debug. In example:
 
 =over 4
 
-=item Hook::LexWrap
+=item Carp (in standard Perl distribution)
 
 =item Gtk2::GladeXML
 
@@ -152,7 +217,7 @@ This method turns on/off debug. In example:
 
 =head1 INCOMPATIBILITIES
 
-This package will define C<AUTOLOAD> function in C<main> package. You should consider this (little work around?), when You're using AUTOLOAD in Your application (exactly main::AUTOLOAD). This will be corrected in future versions.
+None known. You can even use AUTOLOAD in Your application and all modules.
 
 =head1 BUGS AND LIMITATIONS
 

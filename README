@@ -5,10 +5,11 @@ NAME
 SYNOPSIS
             use Gtk2::GladeXML::OO;
         
+            # exactly as in Gtk2::GladeXML
             our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
             $gladexml->signal_autoconnect_from_package('main');
 
-            $gladexml->debug(1);
+            $gladexml->debug(2);
 
             sub gtk_main_quit { Gtk2->main_quit; }
 
@@ -28,13 +29,19 @@ SYNOPSIS
             # See example.glade and example.pl in example directory!
 
 DESCRIPTION
-    This module provides AUTOLOAD function for objects (automagicaly loads
-    Your objects, no action is required on your part) and object-oriented
-    interface in Glade callbacks. Now You can use in callbacks: widgets,
-    Your objects or standard functions like before. Gtk2::GladeXML::OO is a
-    drop-in replacement for Gtk2::GladeXML, so after change from
-    Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications will work
-    fine and will have new functionality.
+    This module provides a clean and easy object-oriented interface in Glade
+    callbacks (automagicaly loads objects and do all dirty work for you, no
+    action is required on your part). Now You can use in callbacks: widgets,
+    Your objects or standard functions like before.
+
+    Gtk2::GladeXML::OO is a drop-in replacement for Gtk2::GladeXML, so after
+    a change from Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications
+    will work fine and will have new functionality.
+
+AUTOLOAD
+    If You are using AUTOLOAD subroutine in main package, Gtk2::GladeXML::OO
+    module will invoke it, when it cound'nt find any matching object in
+    Glade file and Your code.
 
 SUBROUTINES/METHODS
     new('/path/to/file.glade')
@@ -45,27 +52,35 @@ SUBROUTINES/METHODS
                 our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 
     debug
-        This method turns on/off debug. In example:
+        This method turns on/off debug. Three levels are acceptable.
+
+                0  =>  turns OFF debug
+                1  =>  turns ON debug (only important information/warnings), DEFAULT
+                2  =>  turns ON debug in verbose mode, use this when You are in a trouble
+
+        In example:
+
+                # tunrs OFF debug
+                $gladexml->debug(0);
+        
+                ...some code...
 
                 # tunrs ON debug
                 $gladexml->debug(1);
         
                 ...some code...
-
-                # turns OFF debug
-                $gledexml->debug(0);
-
+                # turns ON debug in verbose mode
+                $gledexml->debug(2);
+        
     For all other methods see "Gtk2::GladeXML"!
 
 DEPENDENCIES
-    Hook::LexWrap
+    Carp (in standard Perl distribution)
     Gtk2::GladeXML
 
 INCOMPATIBILITIES
-    This package will define "AUTOLOAD" function in "main" package. You
-    should consider this (little work around?), when You're using AUTOLOAD
-    in Your application (exactly main::AUTOLOAD). This will be corrected in
-    future versions.
+    None known. You can even use AUTOLOAD in Your application and all
+    modules.
 
 BUGS AND LIMITATIONS
     None known.
