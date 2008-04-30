@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.40';
+$VERSION = '0.41';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
@@ -21,15 +21,15 @@ sub new {
 }
 #======================================================================
 my $log = sub {
-	my ($name, $object, $method, $params) = @_;
+	my ($name, $object, $method, @params) = @_;
 	
 	$name = '' unless defined $name;
 	$object = '' unless defined $object;
 	$method = '' unless defined $method;
-	@$params = () unless scalar @$params;
-	for(0..$#$params){
-		unless(defined $params->[$_]){ $params->[$_] = "undef\n"; }
-		else { $params->[$_] .= "\n"; }
+	@params = () unless scalar @params;
+	for(0..$#params){
+		unless(defined $params[$_]){ $params[$_] = "undef\n"; }
+		else { $params[$_] .= "\n"; }
 	}
 
 	warn <<EOF;
@@ -47,7 +47,7 @@ my $log = sub {
 		  NAME: $name
 		OBJECT: $object
 		METHOD: $method
-		PARAMS: @$params
+		PARAMS: @params
 	
 ####################################
 	
@@ -58,6 +58,7 @@ EOF
 #======================================================================
 my $parse_params = sub {
 	my ($params) = @_;
+	
 	$params =~ s/^\(|\)\s*$//g;
 	my @params = split(/(?<!\\),/, $params);
 
@@ -69,6 +70,7 @@ my $parse_params = sub {
 		elsif($params[$_] eq 'TRUE') { $params[$_] = TRUE; }
 		elsif($params[$_] eq 'undef') { $params[$_] = undef; }
 	}
+	
 	return @params;
 };
 #======================================================================
@@ -89,11 +91,11 @@ my $imposter = sub {
 	else { @params = @_; } 
 		
 	if(not defined $object){
-		$log->($object, undef, $method, \@params) if $LOG > 1;
+		$log->($object, undef, $method, @params) if $LOG > 1;
 		warn qq/\nNone object was given. Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
 	}elsif(not defined $method){
-		$log->($object, undef, $method, \@params) if $LOG > 1;
+		$log->($object, undef, $method, @params) if $LOG > 1;
 		warn qq/\nNone method was given. Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
 	}
@@ -116,7 +118,7 @@ my $imposter = sub {
 		}else{ $current = $gladexml->get_widget($object); }
 		
 		unless($current){
-			$log->($object, $current, $method, \@params) if $LOG > 1;
+			$log->($object, $current, $method, @params) if $LOG > 1;
 			warn qq/\nUnknown object "$object" in multilevel call! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 			defined $autoload ? return &$autoload : return;
 		}
@@ -126,7 +128,7 @@ my $imposter = sub {
 			my ($method, $params) = $obj[$idx] =~ /([^\(]+)(.*)/;
 			my @params = (); 
 			@params = $parse_params->($params) if $params;
-			$log->($object, $current, $method, \@params) if $LOG > 1;
+			$log->($object, $current, $method, @params) if $LOG > 1;
 			# kasujemy nazwe obiektu, by w logach sie nie pojawiala
 			# leczy tylko raz, przy pierwszej iteracji
 			undef $object if $idx == 0;
@@ -142,7 +144,8 @@ my $imposter = sub {
 		warn qq/\nUnknown method "$method" of object "$object"! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
 	}
-	$log->($object, $current, $method, \@params) if $LOG > 1;
+	
+	$log->($object, $current, $method, @params) if $LOG > 1;
 	$current->$method(@params);
 	return TRUE;
 };
