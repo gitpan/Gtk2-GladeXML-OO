@@ -6,12 +6,12 @@ use warnings;
 use Carp;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.371';
+$VERSION = '0.40';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
 #======================================================================
-my ($gladexml, $widget, $objects, $LOG) = (undef, undef, undef, 1);
+my ($gladexml, $widget, $objects, $level, $LOG) = (undef, undef, undef, undef, 1);
 our $AUTOLOAD;
 #======================================================================
 sub new {
@@ -20,18 +20,19 @@ sub new {
 	return bless $gladexml, $class;
 }
 #======================================================================
-sub _log {
-	my ($object, $method, @params) = @_;
+my $log = sub {
+	my ($name, $object, $method, $params) = @_;
 	
+	$name = '' unless defined $name;
 	$object = '' unless defined $object;
 	$method = '' unless defined $method;
-	@params = () unless @params;
-	for(0..$#params){
-		unless(defined $params[$_]){ $params[$_] = "undef\n"; }
-		else { $params[$_] .= "\n"; }
+	@$params = () unless scalar @$params;
+	for(0..$#$params){
+		unless(defined $params->[$_]){ $params->[$_] = "undef\n"; }
+		else { $params->[$_] .= "\n"; }
 	}
 
-	warn <<EOF
+	warn <<EOF;
 	
 	
 ####################################
@@ -40,16 +41,36 @@ sub _log {
 	
 	CALLED: $AUTOLOAD
 	
+	LEVEL:  $level
+	
 	PARSING
+		  NAME: $name
 		OBJECT: $object
 		METHOD: $method
-		PARAMS: @params
+		PARAMS: @$params
 	
 ####################################
 	
 EOF
+	$level++;
+	return;
+};
+#======================================================================
+my $parse_params = sub {
+	my ($params) = @_;
+	$params =~ s/^\(|\)\s*$//g;
+	my @params = split(/(?<!\\),/, $params);
 
-}
+	foreach(0..$#params){
+		$params[$_] =~ s/^\s+|\s+$//g;
+		$params[$_] =~ s/^('|")(.*)(\1)$/$2/;
+		$params[$_] =~ s/\\,/,/g;
+		if($params[$_] eq 'FALSE'){ $params[$_] = FALSE; }
+		elsif($params[$_] eq 'TRUE') { $params[$_] = TRUE; }
+		elsif($params[$_] eq 'undef') { $params[$_] = undef; }
+	}
+	return @params;
+};
 #======================================================================
 # this _must_ be in check function, otherway someone could redefine our AUTOLOAD
 CHECK {
@@ -60,47 +81,69 @@ my $autoload = *main::AUTOLOAD{CODE};
 my $imposter = sub {
 	my ($object, $method, $params) = $AUTOLOAD =~ /^main::(.+)->([^\(]+)(.*)/;
 
-	my @params;
-	if($params){
-		$params =~ s/^\(|\)\s*$//g;
-		@params = split(/(?<!\\),/, $params);
+	# zerujemy poziom wywolania
+	$level = 0;
 
-		foreach(0..$#params){
-			$params[$_] =~ s/^\s+|\s+$//g;
-			$params[$_] =~ s/^('|")(.*)(\1)$/$2/;
-			$params[$_] =~ s/\\,/,/g;
-			if($params[$_] eq 'FALSE'){ $params[$_] = FALSE; }
-			elsif($params[$_] eq 'TRUE') { $params[$_] = TRUE; }
-			elsif($params[$_] eq 'undef') { $params[$_] = undef; }
-		}
-	}else { @params = @_; } 
-
-	_log($object, $method, @params) if $LOG > 1;
+	my (@params, $current);
+	if($params){ @params = $parse_params->($params); }
+	else { @params = @_; } 
 		
-	if(not $object){
+	if(not defined $object){
+		$log->($object, undef, $method, \@params) if $LOG > 1;
 		warn qq/\nNone object was given. Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
-	}elsif(not $method){
+	}elsif(not defined $method){
+		$log->($object, undef, $method, \@params) if $LOG > 1;
 		warn qq/\nNone method was given. Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
 	}
 
 	$objects->{$object} = $gladexml->get_widget($object) unless $objects->{$object};
 
-	if(not $objects->{$object} and defined $main::{$object}){
+	if($objects->{$object}){
+		$current = $objects->{$object};
+	}elsif(not $objects->{$object} and defined $main::{$object}){
 		local *tmp = $main::{$object};
 		$objects->{$object} = $tmp;
+		$current = $tmp;
+	}elsif($object =~ /^.+->.+$/o){ # zagniezdzone wywolanie => nie mozemy tego zapamietywac
+		my @obj = split(/->/, $object);
+		$object = shift @obj;
+		
+		if(defined $main::{$object}){
+			local *tmp = $main::{$object};
+			$current = $tmp;
+		}else{ $current = $gladexml->get_widget($object); }
+		
+		unless($current){
+			$log->($object, $current, $method, \@params) if $LOG > 1;
+			warn qq/\nUnknown object "$object" in multilevel call! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
+			defined $autoload ? return &$autoload : return;
+		}
+
+		# przechodzimy po kolejnych zagniezdzeniach
+		for my $idx(0..$#obj){
+			my ($method, $params) = $obj[$idx] =~ /([^\(]+)(.*)/;
+			my @params = (); 
+			@params = $parse_params->($params) if $params;
+			$log->($object, $current, $method, \@params) if $LOG > 1;
+			# kasujemy nazwe obiektu, by w logach sie nie pojawiala
+			# leczy tylko raz, przy pierwszej iteracji
+			undef $object if $idx == 0;
+			$current = $current->$method(@params);
+			last unless $current;
+		}
 	}
 	
-	if(not $object){
+	if(not $current){
 		warn qq/\nUnknown object "$object"! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
-	}elsif(not $objects->{$object}->can($method)){
+	}elsif(not $current->can($method)){
 		warn qq/\nUnknown method "$method" of object "$object"! Calling user AUTOLOAD if defined.\n\n/ if $LOG;
 		defined $autoload ? return &$autoload : return;
 	}
-	
-	$objects->{$object}->$method(@params);
+	$log->($object, $current, $method, \@params) if $LOG > 1;
+	$current->$method(@params);
 	return TRUE;
 };
 #-------------------------------------------
@@ -124,7 +167,7 @@ my $imposter = sub {
 
 =head1 NAME
 
-Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented interface to Glade and AUTOLOAD for all objects.
+Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented interface to Glade.
 
 
 =head1 SYNOPSIS
@@ -150,6 +193,8 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented
 	#	myobject->method		<- Gtk2 will pass standard parameters to Your method
 	#	myobject->method()		<- without any parameters, ie. window->hide()
 	#	myobject->method("param0", "param1")	<- with Your parameters
+	#	myobject->get_it()->do_sth("par0", "par1") <- multilevel call to Your object
+	#	tree_view->get_selection->select_all()	<- multilevel call to Glade object!!
 	#
 	#	gtk_main_quit			<- standard function interface, like before
 
@@ -157,7 +202,7 @@ Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object oriented
 
 =head1 DESCRIPTION
 
-This module provides a clean and easy object-oriented interface in Glade callbacks (automagicaly loads objects and do all dirty work for you, B<no action is required on your part>). Now You can use in callbacks: widgets, Your objects or standard functions like before.
+This module provides a clean and easy object-oriented interface in Glade callbacks (automagicaly loads objects and do all dirty work for you, B<no action is required on your part>). Now You can use in callbacks: widgets, Your objects or standard functions like before. Callbacks can be even multilevel!
 
 Gtk2::GladeXML::OO is a drop-in replacement for Gtk2::GladeXML, so after a change from Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications will work fine and will have new functionality.
 
@@ -221,7 +266,7 @@ None known. You can even use AUTOLOAD in Your application and all modules.
 
 =head1 BUGS AND LIMITATIONS
 
-None known.
+Limitation (will be resolved in a future): For now Your objects are loaded only from main package.
 
 =head1 AUTHOR
 

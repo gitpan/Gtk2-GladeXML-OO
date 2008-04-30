@@ -1,5 +1,9 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.40   Wed Apr 30 13:25:24 UTC 2008
+	- Added multilevel calls to objects of user
+	- Added multilevel calls to objects of GLADE
+
 0.371  Thr Apr 17 19:55:07 CEST 2008
 	- Changed structure of installation package
 

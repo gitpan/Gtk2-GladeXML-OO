@@ -1,6 +1,6 @@
 NAME
     Gtk2::GladeXML::OO - Drop-in replacement for Gtk2::GladeXML with object
-    oriented interface to Glade and AUTOLOAD for all objects.
+    oriented interface to Glade.
 
 SYNOPSIS
             use Gtk2::GladeXML::OO;
@@ -23,6 +23,8 @@ SYNOPSIS
             #       myobject->method                <- Gtk2 will pass standard parameters to Your method
             #       myobject->method()              <- without any parameters, ie. window->hide()
             #       myobject->method("param0", "param1")    <- with Your parameters
+            #       myobject->get_it()->do_sth("par0", "par1") <- multilevel call to Your object
+            #       tree_view->get_selection->select_all()  <- multilevel call to Glade object!!
             #
             #       gtk_main_quit                   <- standard function interface, like before
 
@@ -32,7 +34,8 @@ DESCRIPTION
     This module provides a clean and easy object-oriented interface in Glade
     callbacks (automagicaly loads objects and do all dirty work for you, no
     action is required on your part). Now You can use in callbacks: widgets,
-    Your objects or standard functions like before.
+    Your objects or standard functions like before. Callbacks can be even
+    multilevel!
 
     Gtk2::GladeXML::OO is a drop-in replacement for Gtk2::GladeXML, so after
     a change from Gtk2::GladeXML to Gtk2::GladeXML::OO all Your applications
@@ -83,7 +86,8 @@ INCOMPATIBILITIES
     modules.
 
 BUGS AND LIMITATIONS
-    None known.
+    Limitation (will be resolved in a future): For now Your objects are
+    loaded only from main package.
 
 AUTHOR
     Strzelecki £ukasz <strzelec@rswsystems.com>
