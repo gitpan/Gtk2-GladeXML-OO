@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.41';
+$VERSION = '0.42';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
@@ -18,6 +18,12 @@ sub new {
 	my $class = shift;
 	$gladexml = Gtk2::GladeXML->new(@_);
 	return bless $gladexml, $class;
+}
+#======================================================================
+sub debug { 
+	my $lvl = defined $_[1] ? $_[1] : 0;
+	croak(qq/Value "$lvl" is not a digit!/) if $lvl !~ /^\d+$/o;
+	$LOG = $_[1]; 
 }
 #======================================================================
 my $log = sub {
@@ -155,12 +161,6 @@ my $imposter = sub {
 	no warnings 'redefine';
 	
 	*main::AUTOLOAD = $imposter;
-	
-	*Gtk2::GladeXML::debug = sub { 
-									my $lvl = defined $_[1] ? $_[1] : 0;
-									croak(qq/Value "$lvl" is not a digit!/) if $lvl !~ /^\d+$/o;
-									$LOG = $_[1]; 
-									};
 }
 #----------------------------------------------------------------------
 # End of CHECK block
