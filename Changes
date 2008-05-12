@@ -1,5 +1,8 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.421  Mon May 12 21:24:14 CEST 2008
+	- Little workaround for PAR users (problems with AUTOLOAD partialy fixed)
+
 0.42   Sat May 11 16:05:39 CEST 2008
 	- Fixed behavior in PAR environment (error: Can't locate auto/Gtk2/GladeXML/OO/debug.al in @INC)
 

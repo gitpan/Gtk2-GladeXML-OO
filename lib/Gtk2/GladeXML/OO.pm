@@ -6,7 +6,7 @@ use warnings;
 use Carp;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.42';
+$VERSION = '0.421';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
@@ -80,9 +80,6 @@ my $parse_params = sub {
 	return @params;
 };
 #======================================================================
-# this _must_ be in check function, otherway someone could redefine our AUTOLOAD
-CHECK {
-#----------------------------------------------------------------------
 my $autoload = *main::AUTOLOAD{CODE};
 *AUTOLOAD = *main::AUTOLOAD{SCALAR};
 
@@ -155,16 +152,23 @@ my $imposter = sub {
 	$current->$method(@params);
 	return TRUE;
 };
+
 #-------------------------------------------
-# redefine main::AUTOLOAD and define debug()
-{
+# redefine main::AUTOLOAD
+if(exists $ENV{PAR_TEMP}){
 	no warnings 'redefine';
-	
+	*main::AUTOLOAD = $imposter;
+}
+# this _must_ be in CHECK block too, otherway someone could redefine our AUTOLOAD
+#----------------------------------------------------------------------
+CHECK {
+	no warnings 'redefine';
+	$autoload = *main::AUTOLOAD{CODE};
+	*AUTOLOAD = *main::AUTOLOAD{SCALAR};
 	*main::AUTOLOAD = $imposter;
 }
 #----------------------------------------------------------------------
 # End of CHECK block
-}
 #======================================================================
 1;
 
