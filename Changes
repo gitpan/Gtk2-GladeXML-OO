@@ -1,5 +1,8 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.421  Thu Jul 15 20:40:06 CEST 2008
+	- Workaround for a little bug in method get_widget in Gtk2::GladeXML.
+
 0.421  Mon May 12 21:24:14 CEST 2008
 	- Little workaround for PAR users (problems with AUTOLOAD partialy fixed)
 

@@ -6,12 +6,12 @@ use warnings;
 use Carp;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.421';
+$VERSION = '0.422';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
 #======================================================================
-my ($gladexml, $widget, $objects, $level, $LOG) = (undef, undef, undef, undef, 1);
+my ($gladexml, $widget, $objects, $objects_glade, $level, $LOG) = (undef, undef, undef, undef, undef, 1);
 our $AUTOLOAD;
 #======================================================================
 sub new {
@@ -24,6 +24,13 @@ sub debug {
 	my $lvl = defined $_[1] ? $_[1] : 0;
 	croak(qq/Value "$lvl" is not a digit!/) if $lvl !~ /^\d+$/o;
 	$LOG = $_[1]; 
+}
+#======================================================================
+sub get_widget {
+	my ($self, $widget) = @_;
+	return undef unless defined $widget;
+	$objects_glade->{$widget} = $self->SUPER::get_widget($widget) unless defined $objects_glade->{$widget};
+	return $objects_glade->{$widget};
 }
 #======================================================================
 my $log = sub {
