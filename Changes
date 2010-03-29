@@ -1,5 +1,8 @@
 Revision history for Perl extension Gtk2::GladeXML::OO.
 
+0.43   Mon, 29 Mar 2010 15:38:27 +0000
+	- Little fix for broken callbacks handling in some versions of Gtk2::GladeXML for Windows OS.
+
 0.421  Thu Jul 15 20:40:06 CEST 2008
 	- Workaround for a little bug in method get_widget in Gtk2::GladeXML.
 
