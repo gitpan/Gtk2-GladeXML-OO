@@ -11,6 +11,8 @@ our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
 $gladexml->signal_autoconnect_from_package('main');
 $gladexml->debug(2);
 
+$gladexml->load_objects();
+
 # see below for code of this class...
 our $myobject = MyObject->new();
 
