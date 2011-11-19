@@ -8,8 +8,10 @@ SYNOPSIS
             # exactly as in Gtk2::GladeXML
             our $gladexml = Gtk2::GladeXML::OO->new('glade/example.glade');
             $gladexml->signal_autoconnect_from_package('main');
-
+            $gladexml->load_objects(qw/GUI_/);             # insert GUI objects to namespace
             $gladexml->debug(2);
+
+            $::GUI_window->show;     # method "show" of widget with name "GUI_window"
 
             sub gtk_main_quit { Gtk2->main_quit; }
 
@@ -17,6 +19,7 @@ SYNOPSIS
             our $myobject = MyObject->new();
 
             Gtk2->main;
+
 
             # ...and now callbacks in Glade can be:
             #
@@ -74,7 +77,12 @@ SUBROUTINES/METHODS
                 ...some code...
                 # turns ON debug in verbose mode
                 $gledexml->debug(2);
-        
+
+    load_objects(qr/regexp/)
+        This method loads to "main::" namespace all objects corresponding to
+        widgets with names compatible with "regexp". Default "regexp" is set
+        to "qr/^[A-Z]/".
+
     For all other methods see "Gtk2::GladeXML"!
 
 DEPENDENCIES
@@ -90,7 +98,7 @@ BUGS AND LIMITATIONS
     loaded only from main package.
 
 AUTHOR
-    Strzelecki £ukasz <strzelec@rswsystems.com>
+    Strzelecki ≈Åukasz <lukasz@strzeleccy.eu>
 
 LICENCE AND COPYRIGHT
     This program is free software; you can redistribute it and/or modify it

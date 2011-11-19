@@ -7,7 +7,7 @@ use Carp;
 use XML::LibXML::Reader;
 use base 'Gtk2::GladeXML';
 #======================================================================
-$VERSION = '0.5';
+$VERSION = '0.501';
 #======================================================================
 use constant TRUE => not undef;
 use constant FALSE => undef;
@@ -312,7 +312,7 @@ Limitation (will be resolved in a future): For now Your objects are loaded only 
 
 =head1 AUTHOR
 
-Strzelecki Łukasz <strzelec@rswsystems.com>
+Strzelecki Łukasz <lukasz@strzeleccy.eu>
 
 =head1 LICENCE AND COPYRIGHT
 
